@@ -1,23 +1,24 @@
 import optparse
 from socket import *
 
-def connScan(tgtHost, tgtPort):
+screen_lock = Semaphore(value=1)
+def connScan(tgt_host, tgt_port):
     try:
-        connSkt = socket(AF_INET, SOCK_STREAM)
-        connSkt.connect((tgtHost, tgtPort))
-        connSkt.send('Hello\r\n')
-        results = connSkt.recv(100)
-        print '[+]%d/tcp open'% tgtPort
+        conn_skt = socket(AF_INET, SOCK_STREAM)
+        conn_skt.connect((tgt_host, tgt_port))
+        conn_skt.send('Hello\r\n')
+        results = conn_skt.recv(100)
+        print '[+]%d/tcp open'% tgt_port
         print '[+] ' + str(results)
-        connSkt.close()
+        conn_skt.close()
     except:
-        print '[-]%d(tcp closed)'% tgtPort
+        print '[-]%d(tcp closed)'% tgt_port
 
-def portScan(tgtHost, tgtPorts):
+def portScan(tgt_host, tgt_ports):
     try:
-        tgtIP = gethostbyname(tgtHost)
+        tgtIP = gethostbyname(tgt_host)
     except:
-        print "[-] Cannot resolve '%s': Unknown host"%tgtHost
+        print "[-] Cannot resolve '%s': Unknown host"%tgt_host
         return
     try:
         tgtName = gethostbyaddr(tgtIP)
@@ -25,22 +26,23 @@ def portScan(tgtHost, tgtPorts):
     except:
         print '\n[+] Scan Results for: ' + tgtIP
     setdefaulttimeout(1)
-    for tgtPort in tgtPorts:
-        print 'Scanning port ' + tgtPort
-        connScan(tgtHost, int(tgtPort))
+    for tgt_port in tgt_ports:
+        print 'Scanning port ' + tgt_port
+        t = Thread(target=connScan, args=(tgt_host, int(tgt_port)))
+        t.start()
 
 def main():
     parser = optparse.OptionParser('usage %prog -H ' + '<target host> -p <target port>')
-    parser.add_option('-H', dest='tgtHost', type='string', help='specify target host')
-    parser.add_option('-p', dest='tgtPort', type='string', help='specify target port[s] separated by comma')
+    parser.add_option('-H', dest='tgt_host', type='string', help='specify target host')
+    parser.add_option('-p', dest='tgt_port', type='string', help='specify target port[s] separated by comma')
     (options, args) = parser.parse_args()
-    tgtHost = options.tgtHost
-    tgtPorts = str(options.tgtPort).split(',')
-    print tgtPorts
-    if tgtHost is None or tgtPorts[0] is None:
+    tgt_host = options.tgt_host
+    tgt_ports = str(options.tgt_port).split(',')
+    print tgt_ports
+    if tgt_host is None or tgt_ports[0] is None:
         print '[-] You must specify a target host and port[s].'
         exit(0)
-    portScan(tgtHost, tgtPorts)
+    portScan(tgt_host, tgt_ports)
 
 if __name__ == '__main__':
     main()
