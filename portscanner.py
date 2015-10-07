@@ -1,5 +1,6 @@
 import optparse
 from socket import *
+from threading import *
 
 screen_lock = Semaphore(value=1)
 def connScan(tgt_host, tgt_port):
@@ -8,11 +9,15 @@ def connScan(tgt_host, tgt_port):
         conn_skt.connect((tgt_host, tgt_port))
         conn_skt.send('Hello\r\n')
         results = conn_skt.recv(100)
+        screen_lock.acquire()
         print '[+]%d/tcp open'% tgt_port
         print '[+] ' + str(results)
-        conn_skt.close()
     except:
+        screen_lock.acquire()
         print '[-]%d(tcp closed)'% tgt_port
+    finally:
+        screen_lock.release()
+        conn_skt.close()
 
 def portScan(tgt_host, tgt_ports):
     try:
