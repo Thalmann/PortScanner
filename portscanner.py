@@ -1,5 +1,5 @@
 import optparse
-import socket
+from socket import *
 
 def connScan(tgtHost, tgtPort):
     try:
@@ -11,7 +11,7 @@ def connScan(tgtHost, tgtPort):
         print '[+] ' + str(results)
         connSkt.close()
     except:
-        print '[-]%d(tcp closed'% tgtPort
+        print '[-]%d(tcp closed)'% tgtPort
 
 def portScan(tgtHost, tgtPorts):
     try:
@@ -24,7 +24,7 @@ def portScan(tgtHost, tgtPorts):
         print '\n[+] Scan Results for: ' + tgtName[0]
     except:
         print '\n[+] Scan Results for: ' + tgtIP
-    setdefaulttimout(1)
+    setdefaulttimeout(1)
     for tgtPort in tgtPorts:
         print 'Scanning port ' + tgtPort
         connScan(tgtHost, int(tgtPort))
@@ -32,14 +32,15 @@ def portScan(tgtHost, tgtPorts):
 def main():
     parser = optparse.OptionParser('usage %prog -H ' + '<target host> -p <target port>')
     parser.add_option('-H', dest='tgtHost', type='string', help='specify target host')
-    parser.add_option('-p', dest='tgtPort', type='int', help='specify target port[s] separated by comma')
+    parser.add_option('-p', dest='tgtPort', type='string', help='specify target port[s] separated by comma')
     (options, args) = parser.parse_args()
     tgtHost = options.tgtHost
-    tgtPorts = str(options.tgtPort).split(', ')
+    tgtPorts = str(options.tgtPort).split(',')
+    print tgtPorts
     if tgtHost is None or tgtPorts[0] is None:
         print '[-] You must specify a target host and port[s].'
         exit(0)
-    portScan(tgtHot, tgtPorts)
+    portScan(tgtHost, tgtPorts)
 
 if __name__ == '__main__':
     main()
