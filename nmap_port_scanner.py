@@ -1,17 +1,17 @@
 import optparse
 import nmap
+import re
 from socket import *
+
+def is_ip(string):
+    if re.match("[0-9]{1-3}'.'[0-9]{1-3}'.'[0-9]{1-3}'.'[0-9]{1-3}", string) != None:
+        return True
+    return False
 
 def nmap_scan(tgt_host, tgt_port):
     nm_scan = nmap.PortScanner()
     nm_scan.scan(tgt_host, tgt_port)
-    print nm_scan.all_hosts()
-    try:
-        state = nm_scan[tgt_host]['tcp'][int(tgt_port)]['state']
-    except KeyError:
-        state = nm_scan[gethostbyname(tgt_host)]['tcp'][int(tgt_port)]['state']
-    except:
-        print 'Unexpected error: ' + sys.exc_info()[0]
+    state = nm_scan[tgt_host]['tcp'][int(tgt_port)]['state']
     print ' [*] ' + tgt_host + ' tcp/' + tgt_port + ' ' + state
 
 def main():
@@ -21,10 +21,13 @@ def main():
     (options, args) = parser.parse_args()
     tgt_host = options.tgt_host
     tgt_ports = str(options.tgt_port).split(',')
-    print tgt_ports
+    
     if tgt_host is None or tgt_ports[0] is None:
         print '[-] You must specify a target host and port[s].'
         exit(0)
+    
+    tgt_host = tgt_host if is_ip(tgt_host) else gethostbyname(tgt_host)
+    
     for tgt_port in tgt_ports:
         nmap_scan(tgt_host, tgt_port)
 
