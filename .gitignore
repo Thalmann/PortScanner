@@ -1,3 +1,6 @@
+#ignore password dictionaries
+PasswordDictionaries/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
